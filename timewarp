@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intergalactic Timewarp Sychronization Device</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #a8e6cf;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: rgb(0, 0, 0);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .venn-container {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin: 20px auto;
+        }
+        
+        /* Overlap regions */
+        .overlap-region {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .nyc-wellington-overlap {
+            top: 80px;
+            left: 180px;
+            width: 80px;
+            height: 200px;
+            background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 100%);
+            opacity: 0.6;
+            border-radius: 50px;
+        }
+        
+        .nyc-paris-overlap {
+            top: 200px;
+            left: 140px;
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff6b6b 0%, #ffe66d 100%);
+            opacity: 0.6;
+            border-radius: 50px;
+        }
+        
+        .wellington-paris-overlap {
+            top: 200px;
+            left: 240px;
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(135deg, #4ecdc4 0%, #ffe66d 100%);
+            opacity: 0.6;
+            border-radius: 50px;
+        }
+        
+        .triple-overlap {
+            top: 210px;
+            left: 220px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 50%, #ffe66d 100%);
+            opacity: 0.7;
+            border-radius: 50%;
+            z-index: 10;
+        }
+                
+        .circle {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            border: 3px solid white;
+            cursor: grab;
+            user-select: none;
+            z-index: 15;
+        }
+
+        .circle:active {
+            cursor: grabbing;
+        }
+
+        .time-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .time-mark {
+            position: absolute;
+            width: 2px;
+            height: 25px; /* Increased length */
+            background: white;
+            transform-origin: center bottom;
+            top: 15px; /* Moved closer to edge */
+            left: 50%;
+            margin-left: -1px;
+        }
+
+        .hour-mark {
+            height: 30px; /* Increased length */
+            width: 3px;
+            margin-left: -1.5px;
+            top: 10px; /* Moved even closer to edge */
+        }
+
+        .time-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            color: rgb(0, 0, 0);
+            transform-origin: center;
+        }
+        
+        .nyc {
+            background: linear-gradient(180deg, 
+                #ff9999 0%,    /* Lighter red for day */
+                #ff9999 50%, 
+                #cc5555 50%,   /* Darker red for night */
+                #cc5555 100%
+            );
+            top: 80px;
+            left: 60px;
+        }
+
+        .wellington {
+            background: linear-gradient(180deg, 
+                #7dd9d4 0%,    /* Lighter teal for day */
+                #7dd9d4 50%, 
+                #3ba39d 50%,   /* Darker teal for night */
+                #3ba39d 100%
+            );
+            top: 80px;
+            right: 60px;
+        }
+
+        .paris {
+            background: linear-gradient(180deg, 
+                #fff199 0%,    /* Lighter yellow for day */
+                #fff199 50%, 
+                #ccb855 50%,   /* Darker yellow for night */
+                #ccb855 100%
+            );
+            bottom: 80px;
+            left: 150px;
+        }
+        /* Modular time-input class */
+        .time-input {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            min-width: 180px;
+            top: var(--input-top);
+            left: var(--input-left);
+            right: var(--input-right);
+            bottom: var(--input-bottom);
+        }
+        
+        .time-input label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .time-input input,
+        .time-input select {
+            width: 60px;
+            padding: 3px;
+            margin: 2px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .time-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px;
+            min-width: 120px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .city-name {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        
+        .current-time {
+            font-size: 1.1em;
+            font-family: monospace;
+        }
+        
+        .window-display {
+            font-size: 0.9em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .world-time-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+
+        .world-time-toggle input {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Intergalactic Timewarp Sychronization Device 🌌</h1>
+
+        <div class="world-time-toggle">
+            <label>
+                <input type="checkbox" id="world-time-toggle" checked>
+                🌠 Show Local Times
+            </label>
+        </div>
+
+        <div class="venn-container">
+            <!-- NYC Time Input -->
+            <div class="time-input" style="--input-top: 10px; --input-left: 20px;">
+                <label>🗽 NYC Time Window</label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="nyc-start" value="6:00 AM" placeholder="6:00 AM">
+                    <span>to</span>
+                    <input type="text" id="nyc-end" value="11:00 PM" placeholder="11:00 PM">
+                </div>
+            </div>
+
+            <!-- Wellington Time Input -->
+            <div class="time-input" style="--input-top: 10px; --input-right: 20px;">
+                <label>🥝 Wellington Time Window</label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="wellington-start" value="6:00 AM" placeholder="6:00 AM">
+                    <span>to</span>
+                    <input type="text" id="wellington-end" value="10:00 PM" placeholder="10:00 PM">
+                </div>
+            </div>
+
+            <!-- Paris Time Input -->
+            <div class="time-input" style="--input-bottom: 10px; --input-left: 160px;">
+                <label>🗼 Paris Time Window</label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" id="paris-start" value="6:00 AM" placeholder="6:00 AM">
+                    <span>to</span>
+                    <input type="text" id="paris-end" value="10:00 PM" placeholder="10:00 PM">
+                </div>
+            </div>
+           
+            <div class="circle nyc" id="nyc-circle">
+                <div class="time-marks" id="nyc-marks"></div>
+                <div>
+                    🗽 NYC<br>
+                    <span id="nyc-window">6:00 AM-11:00 PM</span>
+                </div>
+            </div>
+            <div class="circle wellington" id="wellington-circle">
+                <div class="time-marks" id="wellington-marks"></div>
+                <div>
+                    🥝 Wellington<br>
+                    <span id="wellington-window">6:00 AM-10:00 PM</span>
+                </div>
+            </div>
+            <div class="circle paris" id="paris-circle">
+                <div class="time-marks" id="paris-marks"></div>
+                <div>
+                    🗼 Paris<br>
+                    <span id="paris-window">6:00 AM-10:00 PM</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="time-display" id="time-display">
+            <div class="time-card">
+                <div class="city-name">🗽 New York</div>
+                <div class="current-time" id="nyc-time"></div>
+                <div class="window-display" id="nyc-status"></div>
+            </div>
+            <div class="time-card">
+                <div class="city-name">🥝 Wellington</div>
+                <div class="current-time" id="wellington-time"></div>
+                <div class="window-display" id="wellington-status"></div>
+            </div>
+            <div class="time-card">
+                <div class="city-name">🗼 Paris</div>
+                <div class="current-time" id="paris-time"></div>
+                <div class="window-display" id="paris-status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parse time string like "6:00 AM" to minutes since midnight
+        function parseTimeString(timeStr) {
+            const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+            if (!match) return 0;
+            
+            let hours = parseInt(match[1]);
+            const minutes = parseInt(match[2]);
+            const ampm = match[3].toUpperCase();
+            
+            if (ampm === 'PM' && hours !== 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+            
+            return hours * 60 + minutes;
+        }
+
+        // Convert minutes to time string like "6:00 AM"
+        function minutesToTimeString(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            return `${hour12}:${mins.toString().padStart(2, '0')} ${ampm}`;
+        }
+
+        function makeDraggable(circle, startInputId, endInputId) {
+            let isDragging = false;
+            let startAngle = 0;
+            let currentRotation = 0;
+            
+            circle.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const rect = circle.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const rect = circle.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                const deltaAngle = currentAngle - startAngle;
+                
+                sensitivityMultiplier=0.05;
+                currentRotation += deltaAngle * 180 / Math.PI * sensitivityMultiplier;
+                currentRotation = ((currentRotation % 360) + 360) % 360;
+                
+                circle.style.transform = `rotate(${currentRotation}deg)`;
+                updateTimeFromRotation(currentRotation, startInputId, endInputId);
+                
+                startAngle = currentAngle;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        }
+
+        function updateTimeFromRotation(rotation, startInputId, endInputId) {
+            const hours = Math.floor(rotation / 15);
+            const startHour = hours % 12 || 12;
+            const endHour = (hours + 8) % 12 || 12;
+            const startAMPM = hours < 12 ? 'AM' : 'PM';
+            const endAMPM = (hours + 8) < 24 ? (hours < 4 ? 'AM' : 'PM') : 'AM';
+            
+            document.getElementById(startInputId).value = `${startHour}:00 ${startAMPM}`;
+            document.getElementById(endInputId).value = `${endHour}:00 ${endAMPM}`;
+            
+            updateCallRecommendation();
+        }
+
+        function updateDialFromInputs(circleId, startInputId, endInputId) {
+            const startTime = parseTimeString(document.getElementById(startInputId).value);
+            const rotation = (startTime / 60) * 15;
+            document.getElementById(circleId).style.transform = `rotate(${rotation}deg)`;
+        }
+
+        function updateTimes() {
+            const now = new Date();
+            const showWorldTime = document.getElementById('world-time-toggle').checked;
+            
+            document.getElementById('time-display').style.display = showWorldTime ? 'flex' : 'none';
+            
+            if (!showWorldTime) return;
+            
+            const nycTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/New_York',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).format(now);
+            
+            const wellingtonTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Pacific/Auckland',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).format(now);
+            
+            const parisTime = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Europe/Paris',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).format(now);
+            
+            document.getElementById('nyc-time').textContent = nycTime;
+            document.getElementById('wellington-time').textContent = wellingtonTime;
+            document.getElementById('paris-time').textContent = parisTime;
+            
+            updateCallRecommendation();
+        }
+        
+        function getHour(timezone) {
+            const now = new Date();
+            return parseInt(new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                hour: '2-digit',
+                hour12: false
+            }).format(now));
+        }
+
+        function updateCallRecommendation() {
+            const nycStart = parseTimeString(document.getElementById('nyc-start').value);
+            const nycEnd = parseTimeString(document.getElementById('nyc-end').value);
+            const wellingtonStart = parseTimeString(document.getElementById('wellington-start').value);
+            const wellingtonEnd = parseTimeString(document.getElementById('wellington-end').value);
+            const parisStart = parseTimeString(document.getElementById('paris-start').value);
+            const parisEnd = parseTimeString(document.getElementById('paris-end').value);
+
+            const nycHour = getHour('America/New_York');
+            const wellingtonHour = getHour('Pacific/Auckland');
+            const parisHour = getHour('Europe/Paris');
+            
+            const nycMinutes = nycHour * 60;
+            const wellingtonMinutes = wellingtonHour * 60;
+            const parisMinutes = parisHour * 60;
+            
+            const nycGood = nycMinutes >= nycStart && nycMinutes <= nycEnd;
+            const wellingtonGood = wellingtonMinutes >= wellingtonStart && wellingtonMinutes <= wellingtonEnd;
+            const parisGood = parisMinutes >= parisStart && parisMinutes <= parisEnd;
+            
+            // Update circle displays
+            document.getElementById('nyc-window').textContent = 
+                `${minutesToTimeString(nycStart)}-${minutesToTimeString(nycEnd)}`;
+            document.getElementById('wellington-window').textContent = 
+                `${minutesToTimeString(wellingtonStart)}-${minutesToTimeString(wellingtonEnd)}`;
+            document.getElementById('paris-window').textContent = 
+                `${minutesToTimeString(parisStart)}-${minutesToTimeString(parisEnd)}`;
+            
+            // Update status
+            document.getElementById('nyc-status').textContent = nycGood ? '✅ Available' : '❌ Not available';
+            document.getElementById('wellington-status').textContent = wellingtonGood ? '✅ Available' : '❌ Not available';
+            document.getElementById('paris-status').textContent = parisGood ? '✅ Available' : '❌ Not available';
+            
+            const recommendation = document.getElementById('best-window');
+            
+            if (nycGood && wellingtonGood && parisGood) {
+                recommendation.innerHTML = '🌟 Perfect time! Everyone is available right now!';
+            } else if ((nycGood && wellingtonGood) || (nycGood && parisGood) || (wellingtonGood && parisGood)) {
+                recommendation.innerHTML = '🔶 Good time for 2 out of 3 cities!';
+            } else {
+                recommendation.innerHTML = '⏰ Adjust time windows or wait for better overlap!';
+            }
+        }
+                
+        function createTimeMarks(markContainer) {
+            for (let i = 0; i < 24; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'time-mark hour-mark';
+                mark.style.transform = `rotate(${i * 15}deg)`;
+                markContainer.appendChild(mark);
+                
+                // Use 24-hour labels pointing inward
+                const label = document.createElement('div');
+                label.className = 'time-label';
+                label.textContent = i.toString().padStart(2, '0');
+                const angle = i * 15;
+                const radius = 70; // Reduced from 85 to move labels closer to center
+                const x = Math.sin(angle * Math.PI / 180) * radius;
+                const y = -Math.cos(angle * Math.PI / 180) * radius;
+                label.style.left = `calc(50% + ${x}px)`;
+                label.style.top = `calc(50% + ${y}px)`;
+                label.style.transform = 'translate(-50%, -50%)';
+                markContainer.appendChild(label);
+            }
+        }
+
+
+        // Format various time inputs
+        function formatTimeInput(input) {
+            let value = input.value.trim();
+            
+            // Handle single digit or double digit hours
+            if (/^\d{1,2}$/.test(value)) {
+                let hours = parseInt(value);
+                
+                if (hours > 23) hours = 23;
+                
+                let hour12, ampm;
+                if (hours === 0) {
+                    hour12 = 12;
+                    ampm = 'AM';
+                } else if (hours <= 12) {
+                    hour12 = hours;
+                    ampm = hours === 12 ? 'PM' : 'AM';
+                } else {
+                    hour12 = hours - 12;
+                    ampm = 'PM';
+                }
+                
+                input.value = `${hour12}:00 ${ampm}`;
+            }
+            // Handle military time: "1300" -> "1:00 PM"  
+            else if (/^\d{3,4}$/.test(value)) {
+                let hours, minutes;
+                if (value.length === 3) {
+                    hours = parseInt(value.substring(0, 1));
+                    minutes = parseInt(value.substring(1));
+                } else {
+                    hours = parseInt(value.substring(0, 2));
+                    minutes = parseInt(value.substring(2));
+                }
+                
+                if (hours > 23) hours = 23;
+                if (minutes > 59) minutes = 59;
+                
+                const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                input.value = `${hour12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+            } 
+            else if (/^\d{1,2}(am|pm)$/i.test(value)) {
+                // "1pm" -> "1:00 PM"
+                const match = value.match(/^(\d{1,2})(am|pm)$/i);
+                const hour = parseInt(match[1]);
+                const ampm = match[2].toUpperCase();
+                input.value = `${hour}:00 ${ampm}`;
+            } 
+            else if (/^\d{1,2}:\d{2}(am|pm)?$/i.test(value)) {
+                // "1:30" or "1:30pm" -> "1:30 PM"
+                const match = value.match(/^(\d{1,2}):(\d{2})(am|pm)?$/i);
+                let hour = parseInt(match[1]);
+                const minutes = match[2];
+                let ampm = match[3] ? match[3].toUpperCase() : (hour >= 12 ? 'PM' : 'AM');
+                
+                if (!match[3] && hour > 12) {
+                    ampm = 'PM';
+                    hour = hour - 12;
+                } else if (!match[3] && hour === 0) {
+                    hour = 12;
+                    ampm = 'AM';
+                }
+                
+                input.value = `${hour}:${minutes} ${ampm}`;
+            }
+        }
+
+        // Update event listeners to handle both 'input' and 'keydown' events
+        function setupInputHandlers(inputIds, circleId) {
+            inputIds.forEach(id => {
+                const input = document.getElementById(id);
+                
+                // Handle Enter key
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        formatTimeInput(input);
+                        updateDialFromInputs(circleId, inputIds[0], inputIds[1]);
+                        updateCallRecommendation();
+                    }
+                });
+                
+                // Handle when input loses focus
+                input.addEventListener('blur', () => {
+                    formatTimeInput(input);
+                    updateDialFromInputs(circleId, inputIds[0], inputIds[1]);
+                    updateCallRecommendation();
+                });
+                
+                // Handle real-time changes
+                input.addEventListener('input', () => {
+                    updateDialFromInputs(circleId, inputIds[0], inputIds[1]);
+                    updateCallRecommendation();
+                });
+            });
+        }
+
+        // Replace existing event listener setup with:
+        setupInputHandlers(['nyc-start', 'nyc-end'], 'nyc-circle');
+        setupInputHandlers(['wellington-start', 'wellington-end'], 'wellington-circle');
+        setupInputHandlers(['paris-start', 'paris-end'], 'paris-circle');
+
+
+        // Initialize the dials
+        createTimeMarks(document.getElementById('nyc-marks'));
+        createTimeMarks(document.getElementById('wellington-marks'));
+        createTimeMarks(document.getElementById('paris-marks'));
+
+        // Initialize draggable circles
+        makeDraggable(document.getElementById('nyc-circle'), 'nyc-start', 'nyc-end');
+        makeDraggable(document.getElementById('wellington-circle'), 'wellington-start', 'wellington-end');
+        makeDraggable(document.getElementById('paris-circle'), 'paris-start', 'paris-end');
+
+        // Add event listeners for input-to-dial sync
+        ['nyc-start', 'nyc-end'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                updateDialFromInputs('nyc-circle', 'nyc-start', 'nyc-end');
+                updateCallRecommendation();
+            });
+        });
+
+        ['wellington-start', 'wellington-end'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                updateDialFromInputs('wellington-circle', 'wellington-start', 'wellington-end');
+                updateCallRecommendation();
+            });
+        });
+
+        ['paris-start', 'paris-end'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                updateDialFromInputs('paris-circle', 'paris-start', 'paris-end');
+                updateCallRecommendation();
+            });
+        });
+        
+        document.getElementById('world-time-toggle').addEventListener('change', updateTimes);
+
+        // Update every 30 seconds
+        setInterval(updateTimes, 30000);
+        updateTimes();
+        updateCallRecommendation();
+    </script>
+</body>
+</html>
