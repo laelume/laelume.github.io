@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>diff_logic_only</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    h1 {
+      font-size: 1rem;
+      color: #9cdcfe;
+      letter-spacing: 0.05em;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .controls label {
+      font-size: 0.85rem;
+      color: #ce9178;
+      cursor: pointer;
+    }
+
+    button {
+      background: #0e639c;
+      color: #fff;
+      border: none;
+      padding: 6px 18px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.85rem;
+      border-radius: 2px;
+    }
+
+    button:hover { background: #1177bb; }
+
+    .editors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 0 0 260px;
+    }
+
+    .editors > div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .editors label {
+      font-size: 0.78rem;
+      color: #858585;
+    }
+
+    textarea {
+      flex: 1;
+      background: #252526;
+      color: #d4d4d4;
+      border: 1px solid #3c3c3c;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      resize: none;
+      outline: none;
+      border-radius: 2px;
+      height: 220px;
+    }
+
+    textarea:focus { border-color: #0e639c; }
+
+    .diff-wrapper {
+      flex: 1;
+      overflow: auto;
+      border: 1px solid #3c3c3c;
+      border-radius: 2px;
+      background: #1e1e1e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead th {
+      background: #252526;
+      color: #858585;
+      text-align: left;
+      padding: 4px 8px;
+      border-bottom: 1px solid #3c3c3c;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 1px 8px;
+      white-space: pre;
+      vertical-align: top;
+      border-right: 1px solid #2d2d2d;
+      width: 50%;
+    }
+
+    tr.equal   td { color: #d4d4d4; }
+    tr.replace td.left  { background: #3a1f1f; color: #f48771; }
+    tr.replace td.right { background: #1f3a1f; color: #89d185; }
+    tr.delete  td.left  { background: #3a1f1f; color: #f48771; }
+    tr.delete  td.right { background: #1e1e1e; color: transparent; }
+    tr.insert  td.left  { background: #1e1e1e; color: transparent; }
+    tr.insert  td.right { background: #1f3a1f; color: #89d185; }
+
+    .empty-msg {
+      color: #555;
+      padding: 12px;
+      font-size: 0.8rem;
+    }
+
+    .stat {
+      font-size: 0.75rem;
+      color: #858585;
+    }
+
+    .stat span.adds  { color: #89d185; }
+    .stat span.dels  { color: #f48771; }
+  </style>
+</head>
+<body>
+
+  <h1>diff_logic_only</h1>
+
+  <div class="controls">
+    <button onclick="runDiff()">Compare</button>
+    <label>
+      <input type="checkbox" id="stripInline">
+      strip inline comments
+    </label>
+    <span class="stat" id="stat"></span>
+  </div>
+
+  <div class="editors">
+    <div>
+      <label>Source A</label>
+      <textarea id="srcA" placeholder="paste source A here..."></textarea>
+    </div>
+    <div>
+      <label>Source B</label>
+      <textarea id="srcB" placeholder="paste source B here..."></textarea>
+    </div>
+  </div>
+
+  <div class="diff-wrapper">
+    <div class="empty-msg" id="emptyMsg">paste two sources and click Compare</div>
+    <table id="diffTable" style="display:none">
+      <thead>
+        <tr>
+          <th>Source A</th>
+          <th>Source B</th>
+        </tr>
+      </thead>
+      <tbody id="diffBody"></tbody>
+    </table>
+  </div>
+
+<script>
+  // (つ -' _ '- )つ    (つ -' _ '- )つ
+  // Strip comments and blank lines from source string.
+  // Mirrors the Python strip_lines logic from diff_logic_only.
+  function stripSource(src, stripInline) {
+    return src.split('\n').filter(line => {
+      let l = line;
+      if (stripInline) l = l.replace(/\s*#.*$/, '');
+      const t = l.trim();
+      // Exclude blank lines and full-line comments
+      return t.length > 0 && !t.startsWith('#');
+    }).map(line => {
+      if (stripInline) line = line.replace(/\s*#.*$/, '');
+      return line.trim();
+    });
+  }
+
+  // (つ -' _ '- )つ    (つ -' _ '- )つ
+  // Compute longest common subsequence indices for two arrays.
+  // Returns matched pairs as [indexA, indexB].
+  function lcs(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 1; i <= m; i++)
+      for (let j = 1; j <= n; j++)
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1] + 1
+          : Math.max(dp[i-1][j], dp[i][j-1]);
+
+    // Backtrack to find matching pairs
+    const pairs = [];
+    let i = m, j = n;
+    while (i > 0 && j > 0) {
+      if (a[i-1] === b[j-1]) { pairs.push([i-1, j-1]); i--; j--; }
+      else if (dp[i-1][j] > dp[i][j-1]) i--;
+      else j--;
+    }
+    return pairs.reverse();
+  }
+
+  // (つ -' _ '- )つ    (つ -' _ '- )つ
+  // Build side-by-side diff rows from two stripped line arrays.
+  // Returns array of { type, left, right } row objects.
+  function buildDiff(linesA, linesB) {
+    const pairs  = lcs(linesA, linesB);
+    const rows   = [];
+    let   ia = 0, ib = 0, pi = 0;
+
+    while (pi < pairs.length) {
+      const [ma, mb] = pairs[pi];
+
+      // Lines before next match: deletions on left, insertions on right
+      while (ia < ma || ib < mb) {
+        if      (ia < ma && ib < mb) { rows.push({ type: 'replace', left: linesA[ia++], right: linesB[ib++] }); }
+        else if (ia < ma)            { rows.push({ type: 'delete',  left: linesA[ia++], right: '' }); }
+        else                         { rows.push({ type: 'insert',  left: '',           right: linesB[ib++] }); }
+      }
+
+      // Matched line
+      rows.push({ type: 'equal', left: linesA[ia++], right: linesB[ib++] });
+      pi++;
+    }
+
+    // Trailing unmatched lines
+    while (ia < linesA.length || ib < linesB.length) {
+      if      (ia < linesA.length && ib < linesB.length) { rows.push({ type: 'replace', left: linesA[ia++], right: linesB[ib++] }); }
+      else if (ia < linesA.length)                        { rows.push({ type: 'delete',  left: linesA[ia++], right: '' }); }
+      else                                                 { rows.push({ type: 'insert',  left: '',           right: linesB[ib++] }); }
+    }
+
+    return rows;
+  }
+
+  // (つ -' _ '- )つ    (つ -' _ '- )つ
+  // Escape HTML special characters for safe text rendering in table cells.
+  function esc(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // (つ -' _ '- )つ    (つ -' _ '- )つ
+  // Main entry point — reads inputs, strips, diffs, and renders the table.
+  function runDiff() {
+    const stripInline = document.getElementById('stripInline').checked;
+    const srcA = document.getElementById('srcA').value;
+    const srcB = document.getElementById('srcB').value;
+
+    const linesA = stripSource(srcA, stripInline);
+    const linesB = stripSource(srcB, stripInline);
+
+    const rows = buildDiff(linesA, linesB);
+
+    const tbody = document.getElementById('diffBody');
+    tbody.innerHTML = '';
+
+    let adds = 0, dels = 0;
+
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.className = row.type;
+
+      const tdL = document.createElement('td');
+      const tdR = document.createElement('td');
+      tdL.className = 'left';
+      tdR.className = 'right';
+      tdL.textContent = row.left;
+      tdR.textContent = row.right;
+      tr.appendChild(tdL);
+      tr.appendChild(tdR);
+      tbody.appendChild(tr);
+
+      if (row.type === 'insert'  || row.type === 'replace') adds++;
+      if (row.type === 'delete'  || row.type === 'replace') dels++;
+    });
+
+    document.getElementById('emptyMsg').style.display  = 'none';
+    document.getElementById('diffTable').style.display = 'table';
+
+    document.getElementById('stat').innerHTML =
+      `<span class="adds">+${adds}</span> &nbsp; <span class="dels">-${dels}</span> &nbsp; ${rows.length} lines`;
+  }
+</script>
+
+</body>
+</html>
