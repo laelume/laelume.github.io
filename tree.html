@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>tree2dir</title>
+  <style>
+    /* Base layout */
+    body {
+      font-family: monospace;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      color: #9cdcfe;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #9cdcfe;
+      margin-bottom: 4px;
+    }
+
+    textarea {
+      width: 100%;
+      background: #252526;
+      color: #d4d4d4;
+      border: 1px solid #3c3c3c;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 1px solid #4a90d9;
+    }
+
+    /* Button row */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: #3c3c3c;
+      color: #d4d4d4;
+      border: 1px solid #555;
+      padding: 6px 14px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4a4a4a;
+    }
+
+    /* Primary action button */
+    #btn-download {
+      background: #4a90d9;
+      color: #fff;
+      border-color: #357ab8;
+    }
+
+    #btn-download:hover {
+      background: #357ab8;
+    }
+
+    #btn-download:disabled {
+      background: #2a4a6a;
+      color: #888;
+      cursor: not-allowed;
+      border-color: #2a4a6a;
+    }
+
+    /* Status line under confirm */
+    #parse-status {
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    /* Log output box */
+    #log-output {
+      background: #111;
+      border: 1px solid #3c3c3c;
+      padding: 8px;
+      font-size: 0.8rem;
+      height: 180px;
+      overflow-y: auto;
+      white-space: pre;
+      margin-top: 6px;
+      color: #b5cea8;
+    }
+
+    .log-skip  { color: #888; }
+    .log-dir   { color: #9cdcfe; }
+    .log-file  { color: #b5cea8; }
+    .log-error { color: #f44747; }
+
+    .section-gap { margin-top: 14px; }
+  </style>
+</head>
+<body>
+
+<h1>tree2dir</h1>
+
+<!-- Tree input -->
+<label for="tree-input">Paste directory tree:</label>
+<textarea id="tree-input" rows="16" placeholder="Paste ASCII tree here..."></textarea>
+
+<div class="btn-row">
+  <button id="btn-confirm">Confirm tree</button>
+  <span id="parse-status">—</span>
+</div>
+
+<!-- Log output -->
+<div class="section-gap">
+  <label>Log:</label>
+  <div id="log-output"></div>
+</div>
+
+<!-- Download -->
+<div class="btn-row section-gap">
+  <button id="btn-download" disabled>Download .zip</button>
+</div>
+
+<!-- JSZip CDN — required for zip generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+// State: holds parsed paths after confirm step
+let confirmedPaths = [];
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * parseTree
+ * Parse an ASCII directory tree string into a list of relative path strings.
+ * Strips box-drawing characters and pipe/dash variants, then reconstructs
+ * paths using an indent-depth stack — mirrors the Python parse_tree logic.
+ *
+ * @param {string} treeStr - Raw pasted tree text
+ * @returns {string[]} - Array of relative paths using forward slashes
+ */
+function parseTree(treeStr) {
+  const lines = treeStr.split('\n');
+  const pathStack = [];
+  const paths = [];
+
+  for (let line of lines) {
+    if (!line.trim()) continue;
+
+    // Strip box-drawing and tree decorator characters, normalise to spaces
+    const cleaned = line.replace(/[│├└─|+\-\\]/g, ' ');
+    const stripped = cleaned.trimStart();
+    const indent = cleaned.length - stripped.length;
+
+    // Strip inline comments (anything after a #)
+    let name = stripped.trim().replace(/#.*$/, '').trim();
+
+    if (!name) continue;
+
+    // Depth derived from indent, normalised to units of 4
+    const depth = Math.floor(indent / 4);
+
+    // Trim stack to current depth then push current name
+    pathStack.splice(depth);
+    pathStack.push(name);
+
+    paths.push(pathStack.join('/'));
+  }
+
+  return paths;
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * isFile
+ * Determine whether a path entry represents a file rather than a directory.
+ * Uses presence of a file extension as the heuristic.
+ *
+ * @param {string} name - Basename of the entry
+ * @returns {boolean}
+ */
+function isFile(name) {
+  return /\.\w+$/.test(name);
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * buildZip
+ * Construct a JSZip instance from a list of relative paths.
+ * Files are created as empty entries; directories are created as folder entries.
+ * Returns a log array alongside the zip instance.
+ *
+ * @param {string[]} paths - Relative paths from parseTree
+ * @returns {{ zip: JSZip, log: Array<{type: string, path: string}> }}
+ */
+function buildZip(paths) {
+  const zip = new JSZip();
+  const log = [];
+
+  for (const relPath of paths) {
+    const name = relPath.split('/').pop();
+
+    if (isFile(name)) {
+      // Empty file entry — JSZip treats string content as file
+      zip.file(relPath, '');
+      log.push({ type: 'FILE', path: relPath });
+    } else {
+      // Folder entry — trailing slash signals directory to JSZip
+      zip.folder(relPath);
+      log.push({ type: 'DIR', path: relPath });
+    }
+  }
+
+  return { zip, log };
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * writeLog
+ * Append structured log entries to the log output element.
+ * Each entry receives a CSS class based on its type for colour coding.
+ *
+ * @param {Array<{type: string, path: string}>} entries
+ */
+function writeLog(entries) {
+  const logEl = document.getElementById('log-output');
+
+  for (const entry of entries) {
+    const line = document.createElement('div');
+    const typeMap = {
+      FILE:  'log-file',
+      DIR:   'log-dir',
+      SKIP:  'log-skip',
+      ERROR: 'log-error',
+    };
+    line.className = typeMap[entry.type] || '';
+    line.textContent = `[${entry.type.padEnd(5)}]  ${entry.path}`;
+    logEl.appendChild(line);
+  }
+
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * confirmTree
+ * Parse the pasted tree string, update the parse status label,
+ * populate confirmedPaths, and enable the download button if valid.
+ */
+function confirmTree() {
+  const treeStr = document.getElementById('tree-input').value.trim();
+  const statusEl = document.getElementById('parse-status');
+  const downloadBtn = document.getElementById('btn-download');
+  const logEl = document.getElementById('log-output');
+
+  // Clear previous state
+  confirmedPaths = [];
+  logEl.innerHTML = '';
+  downloadBtn.disabled = true;
+
+  if (!treeStr) {
+    statusEl.textContent = 'No tree input detected.';
+    return;
+  }
+
+  const paths = parseTree(treeStr);
+  confirmedPaths = paths;
+
+  if (paths.length === 0) {
+    statusEl.textContent = 'Parse returned 0 paths — check tree format.';
+    return;
+  }
+
+  statusEl.textContent = `Confirmed: ${paths.length} paths parsed.`;
+  downloadBtn.disabled = false;
+
+  // Preview log — show parsed paths as DIR/FILE entries without building zip yet
+  const preview = paths.map(p => ({
+    type: isFile(p.split('/').pop()) ? 'FILE' : 'DIR',
+    path: p,
+  }));
+  writeLog(preview);
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+
+/**
+ * downloadZip
+ * Build the zip from confirmedPaths, generate a blob, and trigger a download.
+ * Filename defaults to 'tree2dir.zip'.
+ */
+async function downloadZip() {
+  if (confirmedPaths.length === 0) return;
+
+  const { zip, log } = buildZip(confirmedPaths);
+
+  // Generate zip blob with deflate compression
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+
+  // Trigger browser download
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'tree2dir.zip';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
+// (つ -' _ '- )つ    (つ -' _ '- )つ
+// Event bindings
+
+document.getElementById('btn-confirm').addEventListener('click', confirmTree);
+document.getElementById('btn-download').addEventListener('click', downloadZip);
+</script>
+
+</body>
+</html>
