@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeline: August 2025 to September 2026</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="frame">
+
+<aside class="side">
+  <a class="brand" href="index.html">laelume<small>bioacoustics research</small></a>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="thesis.html">The thesis</a>
+    <a href="projects.html">Projects</a>
+    <div class="sub">
+      <a href="projects.html#identify">Identity and description</a>
+      <a href="projects.html#segment">Finding calls and syllables</a>
+      <a href="projects.html#synth">Synthesis and generation</a>
+      <a href="projects.html#tools">Tools and infrastructure</a>
+      <a href="projects.html#explore">Exploratory methods</a>
+      <a href="projects.html#community">Community and outreach</a>
+    </div>
+    <a class="here" href="timeline.html">Timeline</a>
+  </nav>
+  <div class="foot">
+    <a href="https://github.com/laelume">github.com/laelume</a><br>
+    © 2026 laelume
+  </div>
+</aside>
+
+<main>
+<h1>Timeline</h1>
+<p class="lede">A month-by-month account of the past year, most recent first. Each entry links to the project it belongs to.</p>
+
+<ul class="timeline">
+  <li><span class="when">Sep 2026</span><p class="what"><b>Fitting on the cluster, and a mobile annotator</b>Parametric pitch models (<a href="projects.html#synth">pavo</a>) running as batch jobs on Rāpoi. Port of the <a href="projects.html#tools">yaaat</a> changepoint annotator to Android tablets begun. Codebase mirrored to a bare-repository backup drive.</p></li>
+
+  <li><span class="when">Aug 2026</span><p class="what"><b>Detectors, contours, and the confirmation report</b>Confirmation panel feedback received; introduction chapter restructured around questions rather than methods. <a href="projects.html#segment">Two-head gap detector</a> reached its F1 0.753 separator baseline and gained a review tool. <a href="projects.html#segment">phonemepipe</a> changepoint serialisation wired. Instantaneous-frequency contour alignment bugs found and corrected. KiwiNet MATLAB codebase fully translated. Annotation tool feature comparison written. Species-filtered xeno-canto harvesting. Signal-to-noise batch tool. Zero-conditioning research thread for <a href="projects.html#explore">birdsep</a>. Nocturnal endemic birds study designed. Cluster onboarding completed.</p></li>
+
+  <li><span class="when">Jul 2026</span><p class="what"><b>GPU inference and a challenge task</b><a href="projects.html#segment">AviaNZ</a> command-line extensions for GPU inference and CUDA detection. <a href="projects.html#community">BioDCASE 2026 Task 4</a> scoped. Rāpoi high-performance computing access set up with conda environment and batch templates.</p></li>
+
+  <li><span class="when">Jun 2026</span><p class="what"><b>Attractors, documentation, and bounding boxes</b><a href="projects.html#explore">Phase-space attractor</a> modules written for pysoniq and sylpipe. Unified Sphinx documentation tree for all eight ANVO packages, configured for Read the Docs. Bounding-box annotation schema and noise-labelling work added to yaaat. Agentic coding tooling adopted for repository maintenance.</p></li>
+
+  <li><span class="when">May 2026</span><p class="what"><b>sylpipe version one and the path manifest</b>Full <a href="projects.html#identify">sylpipe</a> and <a href="projects.html#identify">vocal_metrics</a> build: master syllable table, metric engine, PCA and NMF classification methods, syllable segmentation (631 syllables cut from sequence audio). Canonical path manifest fixed. <a href="projects.html#explore">multimapper</a> scoped. Tangent-PCA shape code adopted over prototype dictionaries. GPU SRVF distance path implemented.</p></li>
+
+  <li><span class="when">Apr 2026</span><p class="what"><b>yaaat rebuilt</b><a href="projects.html#tools">yaaat</a> rebuilt as a stable five-tab interface with modular core and tab architecture.</p></li>
+
+  <li><span class="when">Mar 2026</span><p class="what"><b>Pitch dynamics</b>Sigmoid and Heaviside transition models for kiwi contours worked out mathematically, the seed of the <a href="projects.html#synth">pavo</a> fitting work.</p></li>
+
+  <li><span class="when">Nov 2025</span><p class="what"><b>Mapping the field</b>GitHub scraper for the <a href="projects.html#community">bioacoustics software ecosystem</a> built with checkpointed collection and release history, and a plan to correlate against publication data.</p></li>
+
+  <li><span class="when">Sep 2025</span><p class="what"><b>Slicing audio by annotation</b><a href="projects.html#tools">tranche</a> designed as a package with pluggable parsers for AviaNZ, Raven, Audacity, and spreadsheet annotations.</p></li>
+
+  <li><span class="when">Aug 2025</span><p class="what"><b>Time stretching without phase damage</b>Harmonic-agnostic <a href="projects.html#synth">phase-preserving time stretching</a> for bird vocalisations, later shipped as the timewarp-sync browser tool.</p></li>
+</ul>
+
+<p class="muted" style="margin-top:32px">Earlier work (the quantitative vocal metrics baseline, the first five-bird classifier, and the initial field annotations) predates this window and is described on <a href="thesis.html">the thesis page</a>.</p>
+</main>
+
+</div>
+</body>
+</html>

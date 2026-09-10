@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The thesis: vocal individuality in the North Island brown kiwi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="frame">
+
+<aside class="side">
+  <a class="brand" href="index.html">laelume<small>bioacoustics research</small></a>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a class="here" href="thesis.html">The thesis</a>
+    <a href="projects.html">Projects</a>
+    <div class="sub">
+      <a href="projects.html#identify">Identity and description</a>
+      <a href="projects.html#segment">Finding calls and syllables</a>
+      <a href="projects.html#synth">Synthesis and generation</a>
+      <a href="projects.html#tools">Tools and infrastructure</a>
+      <a href="projects.html#explore">Exploratory methods</a>
+      <a href="projects.html#community">Community and outreach</a>
+    </div>
+    <a href="timeline.html">Timeline</a>
+  </nav>
+  <div class="foot">
+    <a href="https://github.com/laelume">github.com/laelume</a><br>
+    © 2026 laelume
+  </div>
+</aside>
+
+<main>
+<h1>The thesis</h1>
+<p class="lede">Computational vocal individuality of the North Island brown kiwi, pursued as a thesis by publication in a School of Mathematics and Statistics.</p>
+
+<h2>Motivation</h2>
+<p>Automated individual identification (often shortened to AIID) is the problem of recognising <em>which</em> animal is calling, not just which species. For kiwi it matters because population monitoring currently depends on call-count surveys that cannot distinguish two birds calling from the same ridge, and on physical capture that is stressful for the bird and expensive for the people. A reliable acoustic signature would turn passive recorders into a census tool.</p>
+<p>Earlier work on kiwi identification (notably Bedoya and Molles, 2021, whose MATLAB code has been translated to Python as part of this project) showed that identification is feasible with convolutional networks. The open questions are about <em>what</em> in the call carries identity, whether that signal is stable across years and recording conditions, and whether it can be described in a way that generalises to birds the model has never heard.</p>
+
+<h2>Dataset</h2>
+<ul>
+  <li>Five known male individuals, recorded across two collections (2020 and 2021) with autonomous recorders in the field.</li>
+  <li>Several hundred hand-segmented syllables drawn from a few dozen call sequences. Each syllable has onset and offset times, and a sparse frequency contour (around six time and frequency breakpoints) stored as changepoint annotations.</li>
+  <li>55 quantitative vocal metrics per syllable, defined in a YAML registry so that the paper, the code, and the data stay in agreement.</li>
+  <li>Additional public recordings harvested from xeno-canto (species-filtered to <em>Apteryx mantelli</em>) for detector training, and a catalogue of fourteen public individual-labelled bird datasets for later cross-species comparison.</li>
+</ul>
+
+<h2>Methods, and why each one</h2>
+<h3>Quantitative vocal metrics</h3>
+<p>Simple, interpretable numbers: durations, frequency bounds, bandwidths, trends, and harmonic intensity at the syllable level, plus timing and positional statistics at the sequence level. With 23 of these features, principal component analysis reduced to seven components followed by a nearest-neighbour or support-vector classifier reaches roughly 88 to 89 percent leave-one-out accuracy over five birds. Recursive feature elimination shows frequency bounds and duration doing most of the work. These metrics are the baseline every other method must beat, and the subject of the framework paper in progress.</p>
+
+<h3>Elastic shape analysis of contours</h3>
+<p>A kiwi syllable on a spectrogram is a curve. Two syllables from the same bird may be the same curve stretched or compressed in time. The square root velocity function (SRVF) framework from functional data analysis compares curves up to exactly that kind of re-timing, giving a distance that ignores tempo but keeps shape. This work computes elastic distance matrices between all pairs of contours (on the GPU, using an anti-diagonal wavefront dynamic programme), fits Karcher means, and encodes each contour as coordinates in a tangent-space principal component basis. A prototype-based dictionary was tried first and found inconclusive: contour shape varies continuously and resists discrete clusters, so a continuous shape code was adopted instead. The shape distances feed a support-vector machine with a precomputed kernel.</p>
+
+<h3>Syllable-type discovery</h3>
+<p>Before syntax can be studied, each syllable needs a label. Non-negative matrix factorisation on feature and spectrogram representations, together with UMAP embedding and density-based clustering, is used to discover recurring syllable types without supervision, and Hungarian matching on cosine similarity compares the discovered templates across birds. Pretrained bioacoustic models (Google's Perch, and CLAP for zero-shot probing) provide alternative embeddings for the same task.</p>
+
+<h3>Deep detectors for segmentation</h3>
+<p>Scaling beyond hand segmentation requires detectors. Two are in progress: a two-head network that finds inter-syllable gaps and syllable regions in raw field recordings, and a small recurrent network that finds frequency-jump changepoints inside a syllable. Both are designed around a domain constraint: not every silence is a syllable gap, and kiwi syllable spacing has no fixed duration, so the detectors must use context rather than thresholds.</p>
+
+<h3>Parametric synthesis</h3>
+<p>The third chapter inverts the problem. If a kiwi syllable is a rise, a plateau, and a fall, then a handful of sigmoid or Heaviside transitions with fitted times and slopes should reproduce it. Those fitted parameters become both a compact identity feature and the control knobs of a synthesiser. Fitting runs on the university cluster.</p>
+
+<h2>Research chapters</h2>
+<table>
+  <tr><th>Main question</th><th>Data</th><th>Approach</th><th>Status</th><th>Intended output</th></tr>
+  <tr>
+    <td>What syllable types does each bird use, and can they be classified per individual?</td>
+    <td>Segmented syllables, metrics registry, contour annotations</td>
+    <td>Quantitative metrics, SRVF shape analysis, NMF and clustering, pretrained embeddings</td>
+    <td>Baseline done; SRVF pipeline active; scaling to the full syllable set</td>
+    <td>Journal paper (metrics framework); BioDCASE workshop</td>
+  </tr>
+  <tr>
+    <td>Is there structure in how syllables are sequenced, and does it differ by bird?</td>
+    <td>Discovered syllable labels over full call sequences</td>
+    <td>Sequence pattern matching, changepoint detection (PELT and dynamic programming), sequence-level NMF</td>
+    <td>Tooling exists (subseq); awaits stable labels from chapter one</td>
+    <td>Journal paper</td>
+  </tr>
+  <tr>
+    <td>Can realistic kiwi calls be generated from a small parametric model?</td>
+    <td>Fitted pitch-shape parameters; synthetic archetype datasets</td>
+    <td>Procedural audio with sigmoid and Heaviside pitch dynamics; hybrid generative models</td>
+    <td>Pitch models being fitted on the cluster</td>
+    <td>Journal paper; playback experiment design</td>
+  </tr>
+</table>
+
+<h2>Evaluation discipline</h2>
+<p>Recordings from one call sequence are never split across training and test folds. Every classifier is evaluated with leave-one-group-out cross-validation grouped by sequence, and the individual bird is used as a grouping key, never as a leaked feature. This rule exists because an early cross-validation protocol was found to be at risk of sequence leakage, and the baseline numbers are only meaningful under the stricter protocol.</p>
+
+<h2>Panel feedback and current writing</h2>
+<p>The confirmation panel asked for a revised introduction chapter of ten pages or less, structured as: big-picture motivation, key questions, gaps in the literature, the dataset, prior methods, and proposed methods with rationale. The supervisor asked that chapters be defined by question rather than by method, which is the structure used in the table above. Writing follows an audit-then-rewrite cycle: check the prose against the metrics registry for gaps, then close them. Literature claims are backed by at least two sourced references each.</p>
+</main>
+
+</div>
+</body>
+</html>

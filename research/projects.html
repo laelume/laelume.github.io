@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects: the ANVO ecosystem</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="frame">
+
+<aside class="side">
+  <a class="brand" href="index.html">laelume<small>bioacoustics research</small></a>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="thesis.html">The thesis</a>
+    <a class="here" href="projects.html">Projects</a>
+    <div class="sub">
+      <a href="#identify">Identity and description</a>
+      <a href="#segment">Finding calls and syllables</a>
+      <a href="#synth">Synthesis and generation</a>
+      <a href="#tools">Tools and infrastructure</a>
+      <a href="#explore">Exploratory methods</a>
+      <a href="#community">Community and outreach</a>
+    </div>
+    <a href="timeline.html">Timeline</a>
+  </nav>
+  <div class="foot">
+    <a href="https://github.com/laelume">github.com/laelume</a><br>
+    © 2026 laelume
+  </div>
+</aside>
+
+<main>
+<h1>Projects</h1>
+<p class="lede">Every package, pipeline, and side study that serves the research, grouped by the part of the problem it addresses. ANVO (ANimal VOcalization) is the umbrella name for the whole codebase.</p>
+<p>Shared conventions run through all of it: no hardcoded paths (everything resolves through a YAML path configuration), a strict split between per-run visual outputs and persistent artifacts that ship with the code, verbose logging behind a flag, fallback methods and experimental features tagged inline so temporary decisions can be found later, and a first docstring line on every function that a small utility parses to build documentation.</p>
+
+<section class="family identify" id="identify">
+<h2>Identity and description</h2>
+<p>Turning a segmented syllable into numbers, shapes, labels, and eventually a guess at which bird produced it.</p>
+
+<div class="project">
+<h3><code>sylpipe</code>: the core identity pipeline</h3>
+<p class="status"><b>Status:</b> active; the centre of the codebase</p>
+<p>Builds the master syllable table from audio, onset-offset annotations, and contour changepoint files; computes per-syllable and per-sequence metrics; and runs the classification methods. Organised as <code>experiments/&lt;model&gt;/&lt;experiment&gt;/</code> so that every run is reproducible from its configuration.</p>
+<ul>
+  <li>Elastic shape analysis on contours via SRVF: alignment, Karcher means, tangent-space principal components, phase-amplitude separation. A GPU path replaces a 45-minute CPU distance matrix. Results are cached by content hash so nothing is recomputed unnecessarily.</li>
+  <li>A prototype-based Karcher-mean dictionary was tried and set aside in favour of a continuous tangent-PCA shape code, with the earlier attempt kept as a design note for comparison.</li>
+  <li>Classification: PCA plus nearest-neighbour or support-vector machine (the 88 percent baseline), an SRVF-kernel support-vector machine, and a PyTorch Lightning classifier head on Perch embeddings.</li>
+  <li>Syllable-type discovery: non-negative matrix factorisation at syllable and sequence level, UMAP with HDBSCAN, and Hungarian matching of templates across birds.</li>
+  <li>Cross-method evaluation with an interactive HTML export: a UMAP map where each point shows its spectrogram on hover.</li>
+  <li>Balanced five-class proxy labels built by binning a one-dimensional embedding of combined length and shape distances, used to sanity-check classifiers before real labels are trusted.</li>
+</ul>
+</div>
+
+<div class="project">
+<h3><code>vocal_metrics</code>: the metrics registry</h3>
+<p class="status"><b>Status:</b> active; subject of the framework paper</p>
+<p>A path-agnostic package that defines quantitative vocal metrics in a YAML registry and computes them with a small metric engine. Syllable-level families cover temporal, frequency, time-frequency, trend, and harmonic intensity measures; sequence-level families cover temporal, frequency, bandwidth, and positional measures. The paper describing this framework is written directly against the registry so that prose never outruns implementation. Power spectral density metrics and compositional descriptors (type counts and entropies) are queued for a later revision.</p>
+</div>
+
+<div class="project">
+<h3>Pretrained embeddings and active learning probes</h3>
+<p class="status"><b>Status:</b> exploratory, feeding the classifier work</p>
+<ul>
+  <li>Perch 2.0 (Google DeepMind) embeddings extracted through ONNX for every syllable, used both for classification and for the interactive UMAP maps.</li>
+  <li>A CLAP zero-shot pipeline with per-chunk caching and checkpoint resumption.</li>
+  <li>Active learning probes using a Parzen-window classifier to ask which syllables would be most informative to label next.</li>
+  <li>An open question on whether BirdNET or a torch-native alternative such as AVES is the better backbone for a torch training loop.</li>
+</ul>
+</div>
+
+<div class="project">
+<h3>KiwiNet translation</h3>
+<p class="status"><b>Status:</b> complete</p>
+<p>A full translation of the Bedoya and Molles (2021) MATLAB codebase for kiwi censusing and individual identification into Python: sixteen files covering the KiwiNet convolutional network, joint clustering, and the identification scripts, plus a generic <code>.mat</code> to <code>.npy</code> converter. Every translation caveat is collected in a numbered flags block at the bottom of each file, and genuine discrepancies between the original scripts are preserved and flagged rather than silently unified.</p>
+</div>
+
+<div class="project">
+<h3>Individual-labelled bird dataset catalogue</h3>
+<p class="status"><b>Status:</b> reference document</p>
+<p>A systematic catalogue of fourteen publicly available bird datasets with individual-level labels (from Zenodo, OSF, and Figshare), along with related mammal corpora, assembled so that methods developed on kiwi can later be tested on other species.</p>
+</div>
+</section>
+
+<section class="family segment" id="segment">
+<h2>Finding calls and syllables</h2>
+<p>Everything upstream of identity: finding kiwi in long recordings, cutting calls into syllables, and locating the changepoints inside a syllable.</p>
+
+<div class="project">
+<h3>Binary kiwi detector and xeno-canto harvester</h3>
+<p class="status"><b>Status:</b> working; synthesis-based data augmentation scoped</p>
+<p>A presence detector built from Perch embeddings and a logistic-regression head. Training data comes from field annotations (AviaNZ-style files, both legacy and current segment formats, with a windowed cache and content-hash identity) and from a standard-library-only harvester that pulls species-filtered recordings from the xeno-canto API and converts them with ffmpeg. A redesign is scoped that mixes isolated syllables onto real background recordings to widen the training set.</p>
+</div>
+
+<div class="project">
+<h3>Two-head gap detector</h3>
+<p class="status"><b>Status:</b> active; combined decoder in progress</p>
+<p>Finds the gaps between syllables in raw field recordings, which is the hard part of automatic segmentation: not every silence is an inter-syllable gap, and kiwi syllable spacing varies. A shared spectral and dilated temporal convolutional trunk feeds two heads, one predicting gap regions and one predicting syllable activity, and the decoder keeps a gap only when syllable activity flanks it on both sides.</p>
+<ul>
+  <li>Separator baseline: F1 of 0.753 (precision 0.684, recall 0.837) at 150 ms tolerance, from a checkpoint that is preserved as the reference.</li>
+  <li>Supervision is small and honest: 442 positive separators across 23 files, 62 hard negatives, and 28 syllable intervals from one file, so the syllable head's in-sample score is not yet a generalisation claim.</li>
+  <li>TweetyBERT is being assessed as a pretrained backbone, with the open question of whether its pretraining band covers the kiwi range of roughly 1600 to 2900 Hz.</li>
+  <li>Experiment tracking and checkpoint provenance in Weights and Biases, after checkpoint lineage confusion proved costly.</li>
+  <li>A companion review tool lets a person accept, reject, or merge predicted separators directly on a spectrogram.</li>
+</ul>
+</div>
+
+<div class="project">
+<h3><code>phonemepipe</code>: changepoints inside a syllable</h3>
+<p class="status"><b>Status:</b> notebook scaffold; training loop being wired</p>
+<p>A small recurrent network that predicts, frame by frame, whether a frequency-jump boundary occurs inside a syllable. Targets come from the existing changepoint annotations; the individual bird is a grouping key for the train-test split, never a feature. Training uses ten-frame windows with carried hidden state. An active learning variant with a YAML configuration and a Parzen-window classifier chooses which syllables to annotate next.</p>
+</div>
+
+<div class="project">
+<h3><code>subseq</code>: changepoints and factorisation over sequences</h3>
+<p class="status"><b>Status:</b> working; being repackaged</p>
+<p>Twelve scripts for changepoint detection (PELT and dynamic programming) and non-negative matrix factorisation with pooling at syllable, individual, sequence, collection, or global level, plus batch processing with checkpoints. Includes a frame-theoretic view of changepoint detection and time-normalised comparison of factor activations using SRVF distances. This is the toolkit the syntax chapter will build on.</p>
+</div>
+
+<div class="project">
+<h3>Instantaneous frequency contours and alignment</h3>
+<p class="status"><b>Status:</b> working; offsets verified interactively</p>
+<p>Automatic contour extraction from syllable audio using instantaneous frequency (the Iatsenko method), overlaid on spectrograms for parameter sweeps. A systematic investigation found and corrected two alignment mismatches between the extractor and the spectrogram grid (a half-window time shift and a half-bin frequency offset). An interactive notebook widget lets a person nudge a contour with arrow keys or the mouse and record per-file offsets. Onset-energy and PESTO pitch-confidence approaches were tried first and rejected for kiwi frequencies.</p>
+</div>
+
+<div class="project">
+<h3>AviaNZ command-line extensions</h3>
+<p class="status"><b>Status:</b> complete</p>
+<p>Extensions to the AviaNZ bird-call analysis tool: GPU inference with a flag to disable it, automatic detection of the installed CUDA driver version, and a configurable directory for saved annotations.</p>
+</div>
+</section>
+
+<section class="family synth" id="synth">
+<h2>Synthesis and generation</h2>
+<p>Going the other way: from a few parameters to a realistic call.</p>
+
+<div class="project">
+<h3><code>pavo</code>: parametric pitch models</h3>
+<p class="status"><b>Status:</b> active; fitting jobs running on the cluster</p>
+<p>Fits kiwi syllable contours with a small number of sigmoid or Heaviside transitions, each with a time, an amplitude, and a steepness. A kiwi syllable typically needs two or three: a rise at onset, one or two plateaus, and a fall at offset. The fitted parameters are physically meaningful, compact, and double as synthesiser controls. Basis shapes and a stepped variant are defined in a pitch-model module, and fitting runs as batch jobs on the Rāpoi high-performance computing cluster.</p>
+</div>
+
+<div class="project">
+<h3>Synthetic datasets and PAM labelling</h3>
+<p class="status"><b>Status:</b> archetype set built; labelling pipeline scoped</p>
+<p>A synthetic syllable dataset built from ten archetypes (tonal, linear rising and falling, logarithmic variants, sinusoidal, and step-shaped) used to test segmentation and classification methods under known ground truth. A separate four-stage pipeline for labelling passive acoustic monitoring recordings is scoped for eventual dataset publication, with the single-label versus multi-label schema identified as the gating decision and random sampling required alongside detector-based selection to avoid bias.</p>
+</div>
+
+<div class="project">
+<h3>Phase-preserving time stretching</h3>
+<p class="status"><b>Status:</b> shipped as a browser tool (timewarp-sync)</p>
+<p>A harmonic-agnostic approach to stretching bird vocalisations in time without destroying phase relationships, built for the fast frequency modulation and mixed tonal-noisy content that defeat standard phase vocoder and PSOLA methods. Available as a tool on the landing site.</p>
+</div>
+</section>
+
+<section class="family tools" id="tools">
+<h2>Tools and infrastructure</h2>
+<p>The software that makes the research repeatable, by this project and hopefully by others.</p>
+
+<div class="project">
+<h3><code>yaaat</code>: Yet Another Audio Annotation Tool</h3>
+<p class="status"><b>Status:</b> stable desktop tool; mobile port started</p>
+<p>A five-tab annotation interface for bioacoustics: changepoint, peak, harmonic, and binary annotators, plus batch views. Designed around one principle: every control that changes what is on screen (FFT size, hop, overlays, algorithm choice) is surfaced as an immediate button, never hidden in a dialog. A feature comparison against Raven Pro, Audacity, Sonic Visualiser, Praat, AviaNZ, and BirdNET applies exactly that standard.</p>
+<ul>
+  <li>Modular <code>core/</code> and <code>tabs/</code> architecture with a shared base layer and a bounding-box annotation schema.</li>
+  <li>Command-line entry points for audio and annotation directories; when the annotation directory changes at runtime, prior annotations for the open file appear as grey dots with a keep-new, keep-old, or merge dialog.</li>
+  <li>Multi-format annotation input and output, peak snapping, drag-correction of detections, and multiple contour extraction modes.</li>
+  <li>A port to Android tablets is underway, starting with the changepoint annotator and bounding boxes.</li>
+</ul>
+</div>
+
+<div class="project">
+<h3>SpectroVizard</h3>
+<p class="status"><b>Status:</b> working editor extension</p>
+<p>A zero-dependency VSCodium extension that renders spectrograms in a webview with a pure-JavaScript FFT and the Web Audio API, with the same wheel navigation and zoom conventions as yaaat and audio playback with a playhead.</p>
+</div>
+
+<div class="project">
+<h3><code>pysoniq</code></h3>
+<p class="status"><b>Status:</b> published on PyPI</p>
+<p>A lightweight, cross-platform audio library used throughout the ecosystem for loading, lazy segment reading, playback, and signal-processing primitives. Librosa dependencies were replaced across the codebase in its favour. Also hosts the phase-space attractor module described under exploratory methods.</p>
+</div>
+
+<div class="project">
+<h3><code>jellyfish</code> and <code>tranche</code></h3>
+<p class="status"><b>Status:</b> in daily use</p>
+<p><code>jellyfish</code> is the notebook utility layer: dated per-run output directories, timestamps, and the helpers that keep visual artifacts separate from shippable data. <code>tranche</code> is a package for slicing audio according to annotations from AviaNZ, Raven, Audacity, and spreadsheet formats through a common parser interface.</p>
+</div>
+
+<div class="project">
+<h3>Documentation and compute</h3>
+<p class="status"><b>Status:</b> documentation builds locally; cluster in use</p>
+<ul>
+  <li>A single Sphinx tree documents all eight ANVO packages (<code>pysoniq</code>, <code>yaaat</code>, <code>sylpipe</code>, <code>subseq</code>, <code>jellyfish</code>, <code>multimapper</code>, <code>models</code>, <code>vocal_metrics</code>), with API pages regenerated automatically on every build and versions read from git tags, configured for Read the Docs.</li>
+  <li>The Rāpoi cluster at Victoria University of Wellington (Slurm, A100 GPUs) runs the heavy shape-analysis and fitting jobs, with a conda environment recreated from an exported file and batch templates for training.</li>
+  <li>Three-branch git layout per repository (local development, public development, main), with a mirrored bare-repository backup on a separate drive.</li>
+</ul>
+</div>
+</section>
+
+<section class="family explore" id="explore">
+<h2>Exploratory methods</h2>
+<p>Ideas tried because they might expose structure the standard methods miss. Some will make it into the thesis; some are recorded so they are not tried twice.</p>
+
+<div class="project">
+<h3>Topological data analysis on spectrograms</h3>
+<p class="status"><b>Status:</b> experimental</p>
+<ul>
+  <li>Persistent homology on spectrograms treated as cubical complexes, and Ball Mapper on syllable point clouds with animated sweeps over the radius parameter.</li>
+  <li>MEAMD (<code>meadow</code>): nested morphological openings at geometrically increasing scales, followed by sublevel-set filtration and clustering. Running at four scales rather than the motivated seven because of memory limits.</li>
+  <li><code>multimapper</code>: the Mapper algorithm with spectral centroid as the lens function and a data-adaptive median-split cover, with Ball Mapper as a lens-free comparison, applied at sequence level with placeholder scopes for finer levels.</li>
+  <li>An origami wavelet evaluated against frame theory: it satisfies the upper frame bound (a Bessel sequence) but the lower bound is unestablished; the closest formal home is nonstationary Gabor frames.</li>
+  <li>Spectrogram zeros treated as an analytical object in their own right.</li>
+</ul>
+</div>
+
+<div class="project">
+<h3>Phase-space attractors</h3>
+<p class="status"><b>Status:</b> modules written</p>
+<p>Each syllable is embedded as a three-dimensional trajectory using Takens delay embedding (delay chosen by average mutual information, dimension reported by false nearest neighbours), rendered as a rotating animation, and compared to other syllables through bottleneck and Wasserstein distances between persistence diagrams. The resulting distance matrix is embedded into a two-dimensional similarity map.</p>
+</div>
+
+<div class="project">
+<h3><code>birdsep</code>: source separation</h3>
+<p class="status"><b>Status:</b> experimental; fine-tuning planned</p>
+<p>Separating overlapping calls in field recordings. Conv-TasNet is the default in the Asteroid framework and SepFormer in ESPnet, with several other architectures stubbed for comparison and Bird MixIT checkpoints harvested for filterbank weights. A research thread on zero-conditioning uses a Voronoi tessellation of spectrogram zeros as a conditioning prior, with four falsifiable hypotheses and a batch manifest of seven conditioning variants, alongside a replication of DPTTNet.</p>
+</div>
+
+<div class="project">
+<h3>Noise labelling and denoising</h3>
+<p class="status"><b>Status:</b> experimental</p>
+<p>Annotation of noise regions inside yaaat and training of denoising models on the labelled regions, together with a signal-to-noise ratio calculator that scans a directory of recordings and reports per-file frame-based estimates.</p>
+</div>
+</section>
+
+<section class="family community" id="community">
+<h2>Community and outreach</h2>
+<p>Work that faces outward: challenges, proposals, meta-research, and collaboration.</p>
+
+<div class="project">
+<h3>Vocalisation metrics framework paper</h3>
+<p class="status"><b>Status:</b> drafting sections 4 and 5</p>
+<p>A technical paper describing the metrics framework and analysis pipeline, written in collaboration with the Acoustic Research Institute of the Austrian Academy of Sciences in Vienna. An abstract has been submitted to the World Ecoacoustics Congress 2026, and a research visit to Vienna combined with congress attendance has been proposed for funding.</p>
+</div>
+
+<div class="project">
+<h3>BioDCASE 2026, Task 4: active learning for bioacoustics</h3>
+<p class="status"><b>Status:</b> scoped</p>
+<p>A submission to the active learning task, in which the only editable file is the sampling strategy inside the organisers' framework. The active learning probes built for syllable labelling feed directly into this.</p>
+</div>
+
+<div class="project">
+<h3>MIREX 2026 proposal: structural transition point detection</h3>
+<p class="status"><b>Status:</b> full nine-section draft</p>
+<p>A proposed challenge task for the Music Information Retrieval Evaluation eXchange, drawing on a parallel life as a musician and composer. The task asks systems to detect points in a composition where a structural transition is viable and to score compatibility between sections at those points, evaluated on spectral, rhythmic, and textural properties rather than tonal function. The stated purpose is to redirect generative music research toward augmenting composers rather than replacing them, and the framing is deliberately independent of any single musical tradition.</p>
+</div>
+
+<div class="project">
+<h3>The bioacoustics software ecosystem</h3>
+<p class="status"><b>Status:</b> scraper complete; analysis framework outlined</p>
+<p>A GitHub scraper that catalogues bioacoustics repositories by activity rather than popularity, with checkpointed collection, release histories, topic extraction from README files, and a plan to correlate development trends against publication data from OpenAlex.</p>
+</div>
+
+<div class="project">
+<h3>Nocturnal endemic birds by region</h3>
+<p class="status"><b>Status:</b> study design</p>
+<p>A side study asking which regions have the highest proportion of nocturnal species among their endemic breeding land birds, operationalised against trait databases (EltonTraits, AVONET, AVONICHE) and BirdLife range data, with explicit provenance tags on every diel classification. Motivated by the kiwi, which is one of the few nocturnal ratites.</p>
+</div>
+</section>
+</main>
+
+</div>
+</body>
+</html>
