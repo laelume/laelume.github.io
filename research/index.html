@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>laelume research: telling kiwi apart by voice</title>
-<meta name="description" content="Computational vocal individuality of the North Island brown kiwi, and the ANVO software ecosystem built around it.">
+<title>ashlae blum(e) research page</title>
+<meta name="description" content="Computational approached towards vocal individuality of North Island Brown Kiwi">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -33,12 +33,12 @@
 </aside>
 
 <main>
-<h1>Can a machine tell one kiwi from another by its call?</h1>
-<p class="lede">This site describes a PhD research programme on the vocal individuality of the North Island brown kiwi (<em>Apteryx mantelli</em>), together with the collection of software projects, named ANVO, that has grown up around it.</p>
+<h1>Individual Vocal Identity using Computational Bioacoustics?</h1>
+<p class="lede">In my PhD research, I'm exploring a wide variety of topics in computational bioacoustics. One main theme has been on the individual vocal identity of avian species. My PhD is based in New Zealand, where I'm applying my methodology to understand the vocal individuality of North Island Brown Kiwi (<em>Apteryx mantelli</em>). Along the way, I've designed a suite of software tools to make my life easier (or sometimes more difficult)!</p>
 
 <div class="contour" aria-hidden="true">
 <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img">
-  <title>Stylised kiwi call: three syllables separated by gaps</title>
+  <title>Proxy kiwi call using frequency contours: three syllables separated by intersyllable gaps</title>
   <rect x="0" y="0" width="720" height="200" fill="#141d2c"/>
   <g stroke="#24314a" stroke-width="1">
     <line x1="0" y1="50" x2="720" y2="50"/>
@@ -67,15 +67,15 @@
     <line x1="712" y1="175" x2="712" y2="190"/>
   </g>
 </svg>
-<p class="cap">A stylised kiwi call as seen on a spectrogram: three syllables (blue contours), each rising fast, holding, then falling. Green ticks mark syllable onsets and offsets, yellow dots mark changepoints inside a syllable, and pink bands mark the gaps between syllables. Nearly every project on this site works on one of these four things.</p>
+<p class="cap">An example of a frequency contours for a synthetic male kiwi call as seen on a spectrogram: three syllables (blue contours) with frequency modulation that rises, holds, and falls. Green ticks mark syllable onsets and offsets, yellow dots mark theoretical changepoints inside a syllable, and pink bands mark the gaps between syllables. This forms the basis of our avian bioacosutics framework.</p>
 </div>
 
-<h2>The question in plain terms</h2>
-<p>Kiwi are nocturnal, hard to see, and loud. Conservation work in Aotearoa New Zealand relies heavily on acoustic recorders left in the bush. Those recorders capture hours of audio, and within it, the calls of individual birds. If the identity of the calling bird could be read from the call alone, it would be possible to count and track kiwi populations without catching or tagging them.</p>
-<p>The research asks whether the shape of a kiwi call carries a stable individual signature, and if so, how to describe that shape mathematically so that a computer can recognise it. The work is question-driven rather than method-driven: each chapter starts from something unknown about kiwi vocal behaviour and picks whichever method answers it.</p>
+<h2>Overview:</h2>
+<p>Kiwi are nocturnal, shy, and relatively rare to encounter in the wild. Conservation work in Aotearoa New Zealand relies heavily on acoustic recorders deployed in the bush for Passive Acoustic Monitoring (PAM). These devices capture hours of audio, including the calls of individual birds. If the identity of the calling bird could be read from the call alone, it would be possible to count and track kiwi populations without catching or tagging them.</p>
+<p>My PhD research concerns understanding the shape of kiwi frequency contours, individualty measurable within the calls, and how to describe those structures mathematically.</p>
 
-<h2>Three linked contributions</h2>
-<p>The thesis is structured as a thesis by publication with three research chapters that build on each other.</p>
+<h2>Intended contributions</h2>
+<p>A handful of intended contributions form the arc of the thesis.</p>
 <ul class="arc">
   <li><b>Describe and classify syllables</b><span>Discover the recurring syllable types each bird uses, and describe each syllable with quantitative vocal metrics and elastic shape analysis of its frequency contour.</span></li>
   <li><b>Read the syntax of a call</b><span>Using the discovered syllable labels, look for patterns in how syllables are sequenced, and detect changepoints in the sequence structure.</span></li>
@@ -83,8 +83,8 @@
 </ul>
 
 <h2>What the data looks like</h2>
-<p>The preliminary dataset is five known male individuals recorded across two field collections (2020 and 2021) on autonomous recording units. From those recordings, several hundred syllables have been segmented by hand (one draft cites 622 syllables from 37 call sequences). Each syllable has onset and offset times, a frequency contour with annotated changepoints, and 55 quantitative vocal metrics.</p>
-<p>A first baseline already exists: principal component analysis followed by nearest-neighbour or support-vector classification reaches high-80s percent accuracy at telling the five birds apart. Much of the current work aims to explain <em>why</em> that works, make it robust to leakage between recordings, and scale it beyond five birds.</p>
+<p>The preliminary dataset comes from a small collection of wild recordings taken in 2020 and 2021 from Animal-Borne Autonomous Recorders (ABARS). From those recordings, several hundred syllables have been segmented by hand. Each syllable has onset and offset times, a frequency contour with annotated changepoints, and 55 quantitative vocal metrics.</p>
+<p>A first baseline already exists: principal component analysis followed by nearest-neighbour and support-vector classification reaches low-90s percent accuracy at telling the birds apart. Much of the current work aims to explain <em>why</em> that works, make it robust to leakage between recordings, and scale it beyond the test population to real and noisy recordings.</p>
 
 <h2>How the projects fit together</h2>
 <p>The software is organised as a family of sibling Python packages under the ANVO umbrella (ANimal VOcalization), each with one job. The <a href="projects.html">projects page</a> groups them by the part of the pipeline they serve:</p>
@@ -94,11 +94,8 @@
   <li><a href="projects.html#synth">Synthesis and generation</a>: parametric pitch models and synthetic datasets that make realistic kiwi calls from a handful of numbers.</li>
   <li><a href="projects.html#tools">Tools and infrastructure</a>: the annotation tool, audio library, notebook utilities, documentation, and compute setup that keep everything reproducible.</li>
   <li><a href="projects.html#explore">Exploratory methods</a>: topological data analysis, attractor reconstruction, and source separation, tried because they might reveal structure the standard methods miss.</li>
-  <li><a href="projects.html#community">Community and outreach</a>: challenge submissions, a proposed music retrieval task, a study of the bioacoustics software ecosystem, and a paper describing the analysis framework.</li>
 </ul>
 
-<h2>Where things stand</h2>
-<p>As of September 2026 the confirmation report has been revised in response to panel feedback, a paper describing the vocalization metrics framework is being drafted with a collaborator at the Acoustic Research Institute in Vienna, an abstract has been submitted to the World Ecoacoustics Congress 2026, and the code has moved onto a university high-performance computing cluster for the heavier shape-analysis and fitting jobs. The <a href="timeline.html">timeline</a> gives a month-by-month account of the past year.</p>
 </main>
 
 </div>
