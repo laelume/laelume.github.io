@@ -73,32 +73,30 @@ Previously, I've worked as a performing musician, composer, sound designer, audi
 </div>
 
 <h2>Overview:</h2>
-<p>Kiwi are nocturnal, shy, and relatively rare to encounter in the wild. Conservation work in Aotearoa New Zealand relies heavily on acoustic recorders deployed in the bush for Passive Acoustic Monitoring (PAM). These devices capture hours of audio, including the calls of individual birds. If the identity of the calling bird could be read from the call alone, it would be possible to count and track kiwi populations without catching or tagging them.</p>
-<p>My PhD research concerns understanding the shape of kiwi frequency contours, individualty measurable within the calls, and how to describe those structures mathematically.</p>
+<p>Kiwi are nocturnal, shy, and somewhat rare to encounter in the wild. Conservation work in Aotearoa New Zealand often uses acoustic recorders deployed in the bush for Passive Acoustic Monitoring (PAM). These devices capture hours of audio, including the calls of individual birds. If a bird's identity could be determined from a wild field recording, it would be possible to count and track kiwi populations without catching or tagging them.</p>
+<p>My PhD research concerns understanding the shape of kiwi frequency contours, how individuality can be measured from a various representations of the audio, and how maths and AI can be used to describe and detect patterns in these sound structures.</p>
 
-<h2>Intended contributions</h2>
-<p>A handful of intended contributions form the arc of the thesis.</p>
+<h2>Proposed contributions</h2>
 <ul class="arc">
-  <li><b>Describe and classify syllables</b><span>Discover the recurring syllable types each bird uses, and describe each syllable with quantitative vocal metrics and elastic shape analysis of its frequency contour.</span></li>
-  <li><b>Read the syntax of a call</b><span>Using the discovered syllable labels, look for patterns in how syllables are sequenced, and detect changepoints in the sequence structure.</span></li>
-  <li><b>Synthesize realistic calls</b><span>Build procedural and hybrid generative models of kiwi calls, with an eye toward future playback experiments in the field.</span></li>
+  <li><b>Describe and classify syllables</b><span>Discover the syllable types each bird uses, and describe each syllable using custom quantitative vocal metrics and elastic shape analysis of its frequency contour.</span></li>
+  <li><b>Read the syntax of a call</b><span>Using discovered syllable labels, look for patterns in how syllables are sequenced, and detect changepoints in the sequence structure.</span></li>
+  <li><b>Synthesize realistic calls</b><span>Build procedural and hybrid generative models of kiwi calls, and use them to design playback experiments to be conducted in the field.</span></li>
 </ul>
 
-<h2>What the data looks like</h2>
+<h2>Dataset</h2>
 <p>The preliminary dataset comes from a small collection of wild recordings taken in 2020 and 2021 from Animal-Borne Autonomous Recorders (ABARS). From those recordings, I annotated several hundred syllables using my custom annotation software, YAAAT. Then I computed the instantaneous frequency contours for each syllable. Since instantaneous frequency algorithms are prone to noise, trimming the audio to the syllable boundaries yields more accurate results. I also defined a set of Quantitative Vocal Metrics (QVM) to characterize a variety of time-frequency properties of the syllables.</p>
 <p>The initial baseline for classification was pretty good. Principal component analysis with nearest-neighbour and support-vector classification gives 87-93% accuracy for distinguishing individual identity. The majority of my work is focused on explaining <em>how and why</em> those results hold, and diving deeply into the nuances of vocal individuality. Additional goals include making my methodology robust to leakage between recordings, and to scale for larger datasets and other species.</p>
 
-<h2>How the projects fit together</h2>
-<p>The software is organised as a family of sibling Python packages under the ANVO umbrella (ANimal VOcalization), each with one job. The <a href="projects.html">projects page</a> groups them by the part of the pipeline they serve:</p>
+<h2>Software</h2>
+<p>My bioacoustics software suite is entitled ANVO (Animal Vocalizations), which is structured as a collection of Python packages. The <a href="projects.html">projects page</a> attempt to organize them conceptually.</p>
 <ul>
-  <li><a href="projects.html#segment">Finding calls and syllables</a>: detecting kiwi in long recordings, locating the gaps between syllables, and marking the changepoints inside a syllable.</li>
-  <li><a href="projects.html#identify">Identity and description</a>: the metrics registry, shape analysis, prototype discovery, and classifiers that turn a syllable into an identity guess.</li>
-  <li><a href="projects.html#synth">Synthesis and generation</a>: parametric pitch models and synthetic datasets that make realistic kiwi calls from a handful of numbers.</li>
-  <li><a href="projects.html#tools">Tools and infrastructure</a>: the annotation tool, audio library, notebook utilities, documentation, and compute setup that keep everything reproducible.</li>
-  <li><a href="projects.html#explore">Exploratory methods</a>: topological data analysis, attractor reconstruction, and source separation, tried because they might reveal structure the standard methods miss.</li>
+  <li><a href="projects.html#segment">Sequences and Syllables</a>: various tasks in sound event detection, syllable and sequence identitfication, phoneme and transitional regions within syllables.</li>
+  <li><a href="projects.html#identify">Identity and description</a>: vocal metrics registry, shape analysis, syllable prototype discovery, identity distribution analysis, classifiers that turn a syllable into an identity estimate.</li>
+  <li><a href="projects.html#synth">Synthesis and generation</a>: parametric physical model for vocal production of birds, DDSP, genetic, and gradient descent parameter optimization for sound matching.</li>
+  <li><a href="projects.html#explore">Exploratory methods</a>: topological data analysis, attractor reconstruction, source separation.</li>
 </ul>
 
-<h2>Where things stand</h2>
+<h2>Timeline</h2>
 <p>This <a href="timeline.html">timeline</a> describes the development history.</p>
 
   
