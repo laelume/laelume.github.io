@@ -30,22 +30,24 @@
 </aside>
 
 <main>
-<h1>The thesis</h1>
-<p class="lede">Computational vocal individuality of the North Island brown kiwi, pursued as a thesis by publication in a School of Mathematics and Statistics.</p>
+<h1>Thesis</h1>
+<p class="lede">Computational methods towards vocal individuality of North island Brown Kiwi</p>
 
 <h2>Motivation</h2>
-<p>Automated individual identification (often shortened to AIID) is the problem of recognising <em>which</em> animal is calling, not just which species. For kiwi it matters because population monitoring currently depends on call-count surveys that cannot distinguish two birds calling from the same ridge, and on physical capture that is stressful for the bird and expensive for the people. A reliable acoustic signature would turn passive recorders into a census tool.</p>
-<p>Earlier work on kiwi identification (notably Bedoya and Molles, 2021, whose MATLAB code has been translated to Python as part of this project) showed that identification is feasible with convolutional networks. The open questions are about <em>what</em> in the call carries identity, whether that signal is stable across years and recording conditions, and whether it can be described in a way that generalises to birds the model has never heard.</p>
+<p>Automated individual identification (AIID) involves the problem of recognizing <em>which</em> individual animal is calling from an acoustic recoding, not just which species. Population monitoring has traditionally relied on physically observation and capture, which can be stressful or invasive for animals. Passive monitoring depends on call-count surveys that can't differentiate between multiple individuals in the same recording. Building an understanding of how to consistently measure an animal's acoustic signature could turn passive recorders into an individual census tool.</p>
+<p>Prior work on kiwi AIID has shown that some aspects of individual identification are possible with CNNs. The open questions for my research are interested in which measurable acoustic elements of a call might carry which elements of individual identity. Open questions that shoudl be addressed in the process include per-individual signal stability, recording conditions, and generalizing from closed-set to open-set problems.</p>
 
 <h2>Dataset</h2>
 <ul>
-  <li>Five known male individuals, recorded across two collections (2020 and 2021) with autonomous recorders in the field.</li>
-  <li>Several hundred hand-segmented syllables drawn from a few dozen call sequences. Each syllable has onset and offset times, and a sparse frequency contour (around six time and frequency breakpoints) stored as changepoint annotations.</li>
-  <li>55 quantitative vocal metrics per syllable, defined in a YAML registry so that the paper, the code, and the data stay in agreement.</li>
-  <li>Additional public recordings harvested from xeno-canto (species-filtered to <em>Apteryx mantelli</em>) for detector training, and a catalogue of fourteen public individual-labelled bird datasets for later cross-species comparison.</li>
+  <li>Call sequences from several known individuals recorded in 2020 and 2021 using ABARs.</li>
+  <li>Call sequences from unknown individuals obtained through automated detection from PAM recordings.</li>
+  <li>Call sequences from unknkown individuals obtained from open source data repositories.</li>
+  <li>Several hundred annotated syllables from the above datasets. Each syllable has onset and offset times, and an estimated instantaneous frequency contour. A custom tool allows either the manual annotation of contours, or automated computation that can be corrected via user input.</li>
+  <li>55 quantitative vocal metrics per syllable.</li>
+  <li>Future work will incorporate other species using publicly-available individual identity bird datasets for cross-species comparison.</li>
 </ul>
 
-<h2>Methods, and why each one</h2>
+<h2>Methods</h2>
 <h3>Quantitative vocal metrics</h3>
 <p>Simple, interpretable numbers: durations, frequency bounds, bandwidths, trends, and harmonic intensity at the syllable level, plus timing and positional statistics at the sequence level. With 23 of these features, principal component analysis reduced to seven components followed by a nearest-neighbour or support-vector classifier reaches roughly 88 to 89 percent leave-one-out accuracy over five birds. Recursive feature elimination shows frequency bounds and duration doing most of the work. These metrics are the baseline every other method must beat, and the subject of the framework paper in progress.</p>
 
