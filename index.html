@@ -142,6 +142,7 @@
         #tools nav ul {
             list-style: none;
             display: flex;
+            flex-direction: row;
             gap: 16px;
             /* every tile takes an equal share of the row regardless of count */
         }
@@ -157,7 +158,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            height: 100%;
+            aspect-ratio: 1 / 1;
             padding: 16px;
             background-color: var(--card-bg);
             color: var(--text-main);
@@ -165,6 +166,7 @@
             border-radius: var(--radius);
             border: 1px solid #2a2a2a;
             transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+            overflow: hidden;
         }
 
         #tools nav a:hover {
@@ -175,41 +177,21 @@
 
         /* auto bottom margin on the icon pushes the text block to the tile floor */
         #tools nav .tool-icon {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             margin-bottom: auto;
             /* unicode icons to match the social cards; swap for SVG if preferred */
         }
 
         #tools nav .tool-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             line-height: 1.3;
         }
 
         /* subtitle stays dim on hover so the title carries the accent colour */
         #tools nav .tool-sub {
-            font-size: 0.8rem;
-            line-height: 1.35;
-            color: var(--text-dim);
-        }
-
-        /* auto bottom margin on the icon pushes the text block to the tile floor */
-        #tools nav .tool-icon {
-            font-size: 1.6rem;
-            margin-bottom: auto;
-            /* unicode icons to match the social cards; swap for SVG if preferred */
-        }
-
-        #tools nav .tool-title {
-            font-size: 1rem;
-            font-weight: bold;
+            font-size: 0.75rem;
             line-height: 1.3;
-        }
-
-        /* subtitle stays dim on hover so the title carries the accent colour */
-        #tools nav .tool-sub {
-            font-size: 0.8rem;
-            line-height: 1.35;
             color: var(--text-dim);
         }
 
