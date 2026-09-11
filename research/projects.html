@@ -89,13 +89,13 @@
 <p>Everything upstream of identity: finding kiwi in long recordings, cutting calls into syllables, and locating the changepoints inside a syllable.</p>
 
 <div class="project">
-<h3>Binary kiwi detector and xeno-canto harvester</h3>
+<h3>Binary kiwi detector</h3>
 <p class="status"><b>Status:</b> working; synthesis-based data augmentation scoped</p>
-<p>A presence detector built from Perch embeddings and a logistic-regression head. Training data comes from field annotations (AviaNZ-style files, both legacy and current segment formats, with a windowed cache and content-hash identity) and from a standard-library-only harvester that pulls species-filtered recordings from the xeno-canto API and converts them with ffmpeg. A redesign is scoped that mixes isolated syllables onto real background recordings to widen the training set.</p>
+<p>A presence detector built from Perch embeddings and a logistic-regression head. Training data comes from annotated PAM recordings. A redesign is scoped that mixes isolated syllables onto noisy ambient environmental background recordings to widen the training set.</p>
 </div>
 
 <div class="project">
-<h3>Two-head gap detector</h3>
+<h3>AMARU: two-head sound event detector</h3>
 <p class="status"><b>Status:</b> active; combined decoder in progress</p>
 <p>Finds the gaps between syllables in raw field recordings, which is the hard part of automatic segmentation: not every silence is an inter-syllable gap, and kiwi syllable spacing varies. A shared spectral and dilated temporal convolutional trunk feeds two heads, one predicting gap regions and one predicting syllable activity, and the decoder keeps a gap only when syllable activity flanks it on both sides.</p>
 <ul>
@@ -108,7 +108,7 @@
 </div>
 
 <div class="project">
-<h3><code>phonemepipe</code>: changepoints inside a syllable</h3>
+<h3><code>phonepipe</code>: changepoints inside a syllable</h3>
 <p class="status"><b>Status:</b> notebook scaffold; training loop being wired</p>
 <p>A small recurrent network that predicts, frame by frame, whether a frequency-jump boundary occurs inside a syllable. Targets come from the existing changepoint annotations; the individual bird is a grouping key for the train-test split, never a feature. Training uses ten-frame windows with carried hidden state. An active learning variant with a YAML configuration and a Parzen-window classifier chooses which syllables to annotate next.</p>
 </div>
@@ -125,11 +125,7 @@
 <p>Automatic contour extraction from syllable audio using instantaneous frequency (the Iatsenko method), overlaid on spectrograms for parameter sweeps. A systematic investigation found and corrected two alignment mismatches between the extractor and the spectrogram grid (a half-window time shift and a half-bin frequency offset). An interactive notebook widget lets a person nudge a contour with arrow keys or the mouse and record per-file offsets. Onset-energy and PESTO pitch-confidence approaches were tried first and rejected for kiwi frequencies.</p>
 </div>
 
-<div class="project">
-<h3>AviaNZ command-line extensions</h3>
-<p class="status"><b>Status:</b> complete</p>
-<p>Extensions to the AviaNZ bird-call analysis tool: GPU inference with a flag to disable it, automatic detection of the installed CUDA driver version, and a configurable directory for saved annotations.</p>
-</div>
+
 </section>
 
 <section class="family synth" id="synth">
