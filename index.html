@@ -141,14 +141,15 @@
 
         #tools nav ul {
             list-style: none;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            display: flex;
             gap: 16px;
-            max-width: 1000px;
+            /* every tile takes an equal share of the row regardless of count */
         }
 
         #tools nav li {
             margin: 0;
+            flex: 1 1 0;
+            min-width: 0;
         }
 
         /* each tool is a square tile: icon at the top, title and subtitle at the bottom */
@@ -156,8 +157,8 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            aspect-ratio: 1 / 1;
-            padding: 18px;
+            height: 100%;
+            padding: 16px;
             background-color: var(--card-bg);
             color: var(--text-main);
             text-decoration: none;
