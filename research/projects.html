@@ -189,15 +189,7 @@
 <p><code>jellyfish</code> is the notebook utility layer: dated per-run output directories, timestamps, and the helpers that keep visual artifacts separate from shippable data. <code>tranche</code> is a package for slicing audio according to annotations from AviaNZ, Raven, Audacity, and spreadsheet formats through a common parser interface.</p>
 </div>
 
-<div class="project">
-<h3>Documentation and compute</h3>
-<p class="status"><b>Status:</b> documentation builds locally; cluster in use</p>
-<ul>
-  <li>A single Sphinx tree documents all eight ANVO packages (<code>pysoniq</code>, <code>yaaat</code>, <code>sylpipe</code>, <code>subseq</code>, <code>jellyfish</code>, <code>multimapper</code>, <code>models</code>, <code>vocal_metrics</code>), with API pages regenerated automatically on every build and versions read from git tags, configured for Read the Docs.</li>
-  <li>The Rāpoi cluster at Victoria University of Wellington (Slurm, A100 GPUs) runs the heavy shape-analysis and fitting jobs, with a conda environment recreated from an exported file and batch templates for training.</li>
-  <li>Three-branch git layout per repository (local development, public development, main), with a mirrored bare-repository backup on a separate drive.</li>
-</ul>
-</div>
+
 </section>
 
 <section class="family explore" id="explore">
