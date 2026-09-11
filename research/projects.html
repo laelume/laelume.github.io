@@ -33,17 +33,16 @@
 
 <main>
 <h1>Projects</h1>
-<p class="lede">Every package, pipeline, and side study that serves the research, grouped by the part of the problem it addresses. ANVO (ANimal VOcalization) is the umbrella name for the whole codebase.</p>
-<p>Shared conventions run through all of it: no hardcoded paths (everything resolves through a YAML path configuration), a strict split between per-run visual outputs and persistent artifacts that ship with the code, verbose logging behind a flag, fallback methods and experimental features tagged inline so temporary decisions can be found later, and a first docstring line on every function that a small utility parses to build documentation.</p>
+<p class="lede">Packages, pipelines, and side quests grouped by the part of the problem they address. ANVO (ANimal VOcalization) is the umbrella name for the whole codebase.</p>
 
 <section class="family identify" id="identify">
 <h2>Identity and description</h2>
 <p>Turning a segmented syllable into numbers, shapes, labels, and eventually a guess at which bird produced it.</p>
 
 <div class="project">
-<h3><code>sylpipe</code>: the core identity pipeline</h3>
-<p class="status"><b>Status:</b> active; the centre of the codebase</p>
-<p>Builds the master syllable table from audio, onset-offset annotations, and contour changepoint files; computes per-syllable and per-sequence metrics; and runs the classification methods. Organised as <code>experiments/&lt;model&gt;/&lt;experiment&gt;/</code> so that every run is reproducible from its configuration.</p>
+<h3><code>sylpipe and sylpro</code>: syllable pipeline and prototype discovery</h3>
+<p class="status"><b>Status:</b> active</p>
+<p>Builds the main syllable table from audio, onset-offset annotations, and contour changepoint files; computes per-syllable and per-sequence metrics; and runs the classification methods.</p>
 <ul>
   <li>Elastic shape analysis on contours via SRVF: alignment, Karcher means, tangent-space principal components, phase-amplitude separation. A GPU path replaces a 45-minute CPU distance matrix. Results are cached by content hash so nothing is recomputed unnecessarily.</li>
   <li>A prototype-based Karcher-mean dictionary was tried and set aside in favour of a continuous tangent-PCA shape code, with the earlier attempt kept as a design note for comparison.</li>
@@ -57,7 +56,7 @@
 <div class="project">
 <h3><code>vocal_metrics</code>: the metrics registry</h3>
 <p class="status"><b>Status:</b> active; subject of the framework paper</p>
-<p>A path-agnostic package that defines quantitative vocal metrics in a YAML registry and computes them with a small metric engine. Syllable-level families cover temporal, frequency, time-frequency, trend, and harmonic intensity measures; sequence-level families cover temporal, frequency, bandwidth, and positional measures. The paper describing this framework is written directly against the registry so that prose never outruns implementation. Power spectral density metrics and compositional descriptors (type counts and entropies) are queued for a later revision.</p>
+<p>Defines quantitative vocal metrics and provides function-based generators that compute values from time-frequency keypoints. in a YAML registry and computes them with a small metric engine. Syllable-level families cover temporal, frequency, time-frequency, trend, and</p>
 </div>
 
 <div class="project">
@@ -69,12 +68,6 @@
   <li>Active learning probes using a Parzen-window classifier to ask which syllables would be most informative to label next.</li>
   <li>An open question on whether BirdNET or a torch-native alternative such as AVES is the better backbone for a torch training loop.</li>
 </ul>
-</div>
-
-<div class="project">
-<h3>KiwiNet translation</h3>
-<p class="status"><b>Status:</b> complete</p>
-<p>A full translation of the Bedoya and Molles (2021) MATLAB codebase for kiwi censusing and individual identification into Python: sixteen files covering the KiwiNet convolutional network, joint clustering, and the identification scripts, plus a generic <code>.mat</code> to <code>.npy</code> converter. Every translation caveat is collected in a numbered flags block at the bottom of each file, and genuine discrepancies between the original scripts are preserved and flagged rather than silently unified.</p>
 </div>
 
 <div class="project">
